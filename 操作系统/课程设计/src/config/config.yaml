@@ -1,0 +1,30 @@
+process:
+  process_1:
+    idx: 0
+    name: computer
+    state: ready
+    priority: 25
+    codes:
+      - read 2 2
+      - write 2 1 0
+      - read 3 1
+      - read 9 1
+      - output
+      - input read 2 2
+
+  process_2:
+    idx: 1
+    name: filemanager
+    state: ready
+    priority: 10
+    codes:
+      - read 4 2
+      - write 1 1 0
+      - read 2 1
+      - output
+      - read 5 1
+      - input read 2 2
+
+storage_scheduler:
+  memory_size: 3
+  storage_size: 80
