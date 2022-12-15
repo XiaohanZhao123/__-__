@@ -46,6 +46,7 @@ class ProcessScheduler:
 
     def run_one_clock(self, ):
         if self.working_process is None and len(self.block_list) == 0 and len(self.ready_list) == 0:
+            print('所有进程已经完成!')
             self.event.append('所有进程已经运行完成!')
             return
         self._preprocess()
@@ -53,7 +54,7 @@ class ProcessScheduler:
             with self.working_process as (codes, memory, page_frame):
                 self.storage_scheduler.memory.items = memory
                 self.storage_scheduler.page_frame = page_frame
-                code = codes[0]
+                code = codes
                 try:
                     self.run_code(code)
                 except MissingPageError as e:
@@ -62,6 +63,8 @@ class ProcessScheduler:
                     self.storage_scheduler.missing_page(page)
                     self.run_code(code)
                 self.working_process.cpu_time += 1
+            self.working_process.memory = self.storage_scheduler.memory.items
+            self.working_process.page_frame = self.storage_scheduler.page_frame
         self.update()
 
     def update(self):
@@ -91,6 +94,7 @@ class ProcessScheduler:
             self.storage_list[0].assign_storage(
                 self.storage_scheduler.assign_storage(len(self.storage_list[0].page_table)))
             self.ready_list.append(self.storage_list[0])
+            self.event.append(f'调度新进程进入就绪队列，进程名:{self.storage_list[0].name}')
             del self.storage_list[0]
 
         self.ready_list.sort(key=lambda x: x.priority, reverse=True)
@@ -115,12 +119,12 @@ class ProcessScheduler:
             if code.type == 'input':
                 self.working_process.state = 'block'
                 self.working_process.block_time = 0
-                self.working_process.block_need = np.random.randint(2, 4)
+                self.working_process.block_need = 2
                 self.event.append(f'进程：{self.working_process.name} 遇到外部输入，阻塞时间{self.working_process.block_need}')
             if code.type == 'output':
                 self.working_process.state = 'block'
                 self.working_process.block_time = 0
-                self.working_process.block_need = np.random.randint(2, 4)
+                self.working_process.block_need = 2
                 self.event.append(f'进程：{self.working_process.name} 遇到外部输入，阻塞时间{self.working_process.block_need}')
                 self.event.append(f'指令：打印进程状态:\n {self.working_process.state}, {self.working_process.name}, \n'
                                   f'{self.working_process.priority}')
@@ -137,10 +141,14 @@ class StorageScheduler:
 
     def assign_storage(self, size):
         indices = []
-        for idx, avaliable in self.storage.is_avalible:
+        for idx, avaliable in enumerate(self.storage.is_avalible):
+            if size == 0:
+                break
             if avaliable == 1:
                 self.storage.is_avalible[idx] = 0
                 indices.append(idx)
+                size -= 1
+
 
         return indices
 

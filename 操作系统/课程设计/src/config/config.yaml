@@ -3,7 +3,7 @@ process:
     idx: 0
     name: computer
     state: ready
-    priority: 25
+    priority: 99
     codes:
       - read 2 2
       - write 2 1 0
@@ -11,6 +11,10 @@ process:
       - read 9 1
       - output
       - input read 2 2
+      - output
+      - input read 2 1
+      - write 2 2 1
+      - read 2 1
 
   process_2:
     idx: 1
@@ -24,7 +28,70 @@ process:
       - output
       - read 5 1
       - input read 2 2
+      - read 9 1
+      - output
+      - input read 2 2
+      - output
+      - input read 2 1
+
+  process_3:
+    idx: 2
+    name: aaa
+    state: ready
+    priority: 5
+    codes:
+      - read 4 2
+      - write 1 1 0
+      - read 2 1
+      - output
+      - read 5 1
+      - input read 2 2
+      - read 9 1
+      - output
+      - input read 2 2
+      - output
+      - input read 2 1
+
+  process_4:
+    idx: 3
+    name: bbb
+    state: ready
+    priority: 5
+    codes:
+      - read 4 2
+      - write 1 1 0
+      - read 2 1
+      - output
+      - read 5 1
+      - input read 2 2
+      - read 9 1
+      - output
+      - input read 2 2
+      - output
+      - input read 2 1
+
+
+  process_5:
+    idx: 4
+    name: ccc
+    state: ready
+    priority: 3
+    codes:
+      - read 4 2
+      - write 1 1 0
+      - read 2 1
+      - output
+      - read 5 1
+      - input read 2 2
+      - read 9 1
+      - output
+      - input read 2 2
+      - output
+      - input read 2 1
 
 storage_scheduler:
   memory_size: 3
   storage_size: 80
+
+process_scheduler:
+  max_ready_size: 3

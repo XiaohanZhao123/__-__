@@ -19,17 +19,20 @@ class PCB:
     block_time: int
     block_need: int
 
-    def __init__(self, idx, name, state, codes, cpu_need=None):
+    def __init__(self, idx, name, state, codes: List['Code'], priority, cpu_need=None):
         assert state in ['ready', 'running', 'block'], '初始化进程状态非法'
         self.state = state
         self.idx = idx
         self.name = name
-        self.page_table = None
+        page_table_size = max(*[x.return_block_num() for x in codes]) + 1
+        self.page_table = [Page(x) for x in range(page_table_size)]
         self.memory = []
         self.page_frame = []
         self.codes = codes
+        self.pc = -1
         self.block_need = -1
         self.block_time = 0
+        self.priority = priority
         if not cpu_need:
             self.cpu_need = len(codes)
         self.cpu_time = 0
@@ -57,9 +60,9 @@ class PCB:
 @dataclass
 class Code:
     type: str  # 指令类型
-    block_num: Union[int, None]  # 指令逻辑页号
-    shift: Union[int, None]  # 页内偏移
-    input: Union['Code', int]  # 指令输入值
+    block_num: Union[int, None] = None  # 指令逻辑页号
+    shift: Union[int, None] = None  # 页内偏移
+    input: Union['Code', int, None] = None  # 指令输入值
 
     def __init__(self, type, block_num=None, shift=None, input=None):
         if type == 'output':
@@ -82,6 +85,13 @@ class Code:
             self.type = type
             self.input = input
 
+    def return_block_num(self):
+        if self.type in ['read', 'write']:
+            return self.block_num
+        elif self.type == 'input':
+            return self.input.block_num
+        else:
+            return -1
 
 class Page:
     idx: int  # 页号
@@ -98,6 +108,9 @@ class Page:
         self.time = 0
         self.is_in_memory = False
         self.is_modified = False
+
+    def __repr__(self):
+        return f'idx: {self.idx}, memory_num: {self.memory_num}, storage_num: {self.storage_num}'
 
 
 class Blocks:
